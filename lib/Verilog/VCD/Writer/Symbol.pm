@@ -5,6 +5,19 @@ use Math::BaseCalc;
 
 use MooseX::Singleton;
  
+
+=head1 SYNOPSIS
+
+  use Verilog::VCD::Writer::Symbol;
+
+  This is a Singleton class to map the signal name to a compact symbol
+
+=for Pod::Coverage *EVERYTHING*
+
+=cut
+
+
+
 has count => (
     is      => 'rw',
     isa     => 'Int',

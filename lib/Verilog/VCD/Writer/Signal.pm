@@ -14,6 +14,39 @@ has bitmax=>(is=>'ro');
 has bitmin=>(is=>'ro');
 has width=>(is=>'ro',lazy=>1,builder=>"_getWidth");
 has symbol=>(is=>'ro',builder=>"_getSymbol");
+
+
+
+=head1 SYNOPSIS
+
+  use Verilog::VCD::Writer;
+  use Verilog::VCD::Writer::Signal;
+
+  # my $signal=Verilog::VCD::Signal(
+  # name=>'signalName',
+  # type=> 'wire'
+  # bitmax=>7,
+  # bitmin=>0)
+
+=head1 DESCRIPTION
+
+This module is designed to be called from the Verilog::VCD::Writer::Module module.
+
+
+=head1 INTERFACE
+
+
+=head1 DEPENDENCIES
+
+
+=head1 SEE ALSO
+
+
+
+=for Pod::Coverage *EVERYTHING*
+
+=cut
+
 sub _getSymbol{
 my $symTable=Verilog::VCD::Writer::Symbol->instance();
 return $symTable->symbol;
@@ -24,6 +57,8 @@ sub _getWidth{
 	return 1+$self->bitmax-$self->bitmin if($self->bitmax>$self->bitmin);
 	return 1+$self->bitmin - $self->bitmax;
 }
+
+
 sub printScope {
 	my $self=shift;
 	my $bus='';
