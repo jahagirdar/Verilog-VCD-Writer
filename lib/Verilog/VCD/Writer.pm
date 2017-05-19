@@ -9,29 +9,34 @@ use Verilog::VCD::Writer::Module;
  
 =head1 SYNOPSIS
 
-use Verilog::VCD::Writer;
+	use Verilog::VCD::Writer;
 
-my $writer=Verilog::VCD::Writer->new(timescale=>'1 ns',vcdfile=>"test.vcd");
-$writer->addModule("top);
-my $TX=$writer->addSignal("wire","8:0","TX");
-my $RX=$writer->addSignal("wire","8:0","RX");
-$writer->addModule("UART");
-$writer->dupSignal("wire","8:0",$TX);
-$writer->dupSignal("wire","8:0",$RX);
+	my $writer=Verilog::VCD::Writer->new(timescale=>'1 ns',vcdfile=>"test.vcd");
 
-$writer->writeHeaders();
-$writer->setTime(0);
-$writer->addValue($TX,0);
-$writer->addValue($RX,0);
-$writer->setTime(5);
-$writer->addValue($TX,1);
-$writer->addValue($RX,0);
+	my $top=$writer->addModule("top"); # Create toplevel module
+	my $TX=$writer->addSignal("TX",7,0); #Add Signals to top
+	my $RX=$writer->addSignal("RX",7,0);
+
+	my $dut=$top->addModule("DUT");  Create SubModule
+	$dut->dupSignal($TX,"TX",7,0); #Duplicate signals from Top in submodule
+	$dut->dupSignal($RX,"RX",7,0);
+	
+	$writer->writeHeaders(); # Output the VCD Header.
+	$writer->setTime(0); # Time 0
+	$writer->addValue($TX,0); # Record Transition
+	$writer->addValue($RX,0);
+	$writer->setTime(5); # Time 1ns
+	$writer->addValue($TX,1);
+	$writer->addValue($RX,0);
 
 
 =cut 
 
 =head1 DESCRIPTION
-This module originated out of my need to view the <Time,Voltage> CSV dump from the scope using GTKWave. So the current version does not support features like hierarchial modules, tasks, functions etc. It assumes that all the signals are at the top level of the design.
+This module originated out of my need to view the <Time,Voltage> CSV dump from the scope using GTKWave. 
+
+This module provides an interface for creating a VCD (Value change Dump) file.
+
 
 =cut
 
@@ -43,6 +48,7 @@ use namespace::clean;
 
 The constructor takes the following options
 
+=for :list
 * timescale: default is '1ps'
 * vcdfile: default is STDOUT, if a filename is given the VCD output will be written to it.
 * Date: a DateTime object, default is current date.
