@@ -1,10 +1,11 @@
 use Test::More;
 use Test::Output;
+use Test::File::Contents;
 use Verilog::VCD::Writer;
 use DateTime;
-#my $writer=new_ok('Verilog::VCD::Writer',);
-my $writer=Verilog::VCD::Writer->new(vcdfile=>'test.vcd');
-isa_ok($writer, "Verilog::VCD::Writer");
+use Path::Tiny qw( path );
+$|=1;
+ 
 
  my $dt = DateTime->new(
      year      => 2000,
@@ -14,8 +15,7 @@ isa_ok($writer, "Verilog::VCD::Writer");
      minute    => 15,
      time_zone => 'America/Los_Angeles',
  );
-my $writer=Verilog::VCD::Writer->new(vcdfile=>'test.vcd',date=>$dt);
-isa_ok($writer, "Verilog::VCD::Writer");
+
 my $expectedVCD1=<<'VCD';
 $date
 2000-05-10T15:15:00
@@ -52,7 +52,10 @@ b0 "
 0$
 VCD
 
+my $expectedVCD= $expectedVCD1.  $expectedVCD2.  $expectedVCD3;
+
 sub wr{
+	my $writer=shift;
 	my $m1=$writer->addModule("Utop");
 	my $m2=$writer->addModule("UDUT");
 	my $TX=$m1->addSignal("TX");
@@ -74,10 +77,28 @@ sub wr{
 	ok($RX);
 	ok($s3);
 }
-my $expectedVCD= $expectedVCD1.  $expectedVCD2.  $expectedVCD3;
-stdout_is(\&wr,$expectedVCD, "Testing VCD Output");
-my $writer1=Verilog::VCD::Writer->new(date=>$dt,vcdfile=>undef);
-isa_ok($writer1, "Verilog::VCD::Writer");
-wr();
+
+sub readFile{
+	my $file=shift;
+	open(my $fh,"<$file") or die "unable to openfile $file";
+	local $/=undef;
+	my $data=<$fh>;
+	return $data;
+}
+
+print "start Testing\n";
+
+my $writer=Verilog::VCD::Writer->new(date=>$dt,vcdfile=>'test.vcd');
+$writer->addComment("Author:Vijayvithal");
+isa_ok($writer, "Verilog::VCD::Writer");
+print "Testing Print to STDOUT\n";
+wr($writer);
+#stdout_is(sub{wr($writer)},$expectedVCD,"VCD Output Matches");
+$writer->flush;
+sleep 1;
+
+#file_contents_eq_or_diff('test.vcd', 't/out1.vcd',"VCD Output Matches");
+my $data = path('test.vcd')->slurp;
+is($data,$expectedVCD,"OKOK");
 
 done_testing;

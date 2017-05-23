@@ -1,7 +1,8 @@
+package Verilog::VCD::Writer::Signal;
+
 use strict;
 use warnings;
 use DateTime;
-package Verilog::VCD::Writer::Signal;
 
 # ABSTRACT: Signal abstraction layer for Verilog::VCD::Writer
 use Verilog::VCD::Writer::Symbol;
@@ -60,10 +61,10 @@ sub _getWidth{
 
 
 sub printScope {
-	my $self=shift;
+	my ($self,$fh)=@_;
 	my $bus='';
 	$bus="[$self->{bitmax}:$self->{bitmin}]" if(defined $self->bitmax and defined $self->bitmin);
- say join(' ',('$var ', $self->{type},$self->width,$self->{symbol},$self->{name},$bus,'$end')) ;
+ say $fh join(' ',('$var ', $self->{type},$self->width,$self->{symbol},$self->{name},$bus,'$end')) ;
 }
 
 1

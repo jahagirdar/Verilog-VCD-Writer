@@ -1,8 +1,8 @@
+package Verilog::VCD::Writer::Module;
+
 use strict;
 use warnings;
-use Data::Dumper;
 use DateTime;
-package Verilog::VCD::Writer::Module;
 
 # ABSTRACT: Module abstraction layer for Verilog::VCD::Writer
 
@@ -102,11 +102,11 @@ sub addSubModule {
 =cut
 
 sub printScope {
-	my $self=shift;
-	say '$scope '.$self->type.' '.$self->name.' $end';
-	map{$_->printScope}  $self->signals_all;
-	map{$_->printScope}  $self->modules_all;
-	say '$upscope $end';
+	my ($self,$fh)=@_;
+	say $fh '$scope '.$self->type.' '.$self->name.' $end';
+	map{$_->printScope($fh)}  $self->signals_all;
+	map{$_->printScope($fh)}  $self->modules_all;
+	say $fh '$upscope $end';
 }
 
 

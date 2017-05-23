@@ -1,8 +1,8 @@
 use strict;
 use warnings;
-use DateTime;
 package Verilog::VCD::Writer;
 
+use DateTime;
 use Verilog::VCD::Writer::Module;
 
 # ABSTRACT: VCD waveform File creation module.
@@ -12,6 +12,7 @@ use Verilog::VCD::Writer::Module;
 	use Verilog::VCD::Writer;
 
 	my $writer=Verilog::VCD::Writer->new(timescale=>'1 ns',vcdfile=>"test.vcd");
+	$writer->addComment("Author:Vijayvithal");
 
 	my $top=$writer->addModule("top"); # Create toplevel module
 	my $TX=$writer->addSignal("TX",7,0); #Add Signals to top
@@ -57,8 +58,7 @@ The constructor takes the following options
 =cut
 
 has timescale =>(is =>'ro',default=>'1ps');
-has vcdfile =>(is =>'ro',
-	trigger=>\&_redirectSTDOUT);
+has vcdfile =>(is =>'ro');
 has date =>(is=>'ro',isa=>'DateTime',default=>sub{DateTime->now()});
 has _modules=>(is=>'ro',isa=>'ArrayRef[Verilog::VCD::Writer::Module]',
 	default=>sub{[]},
@@ -66,12 +66,23 @@ has _modules=>(is=>'ro',isa=>'ArrayRef[Verilog::VCD::Writer::Module]',
 	handles=>{modules_push=>'push',
 		modules_all=>'elements'}
 );
+has _comments=>(is=>'ro',isa=>'ArrayRef',
+	default=>sub{[]},
+	traits=>['Array'],
+	handles=>{comments_push=>'push',
+		comments_all=>'elements'}
+);
+has _fh=>(is=>'ro',lazy=>1,builder=>"_redirectSTDOUT");
+
 sub _redirectSTDOUT{
 	my $self=shift;
-	say "Reopening STDOUT";
+	my $fh;
 		if(defined $self->vcdfile){
-		   open(STDOUT, ">", $self->vcdfile) or die "unable to write to $self->vcdfile";
+		   open($fh, ">", $self->vcdfile) or die "unable to write to $self->vcdfile";
+	   }else{
+		   open($fh, ">-") or die "unable to write to STDOUT";
 	   }
+	   return $fh;
 	}
 
 =head2 writeHeaders()
@@ -84,18 +95,19 @@ This method outputs the header of the VCD file
 
 sub writeHeaders{
 my $self=shift;
-say '$date';
-say $self->date;
-say '$end
+my $fh=$self->_fh;
+say  $fh '$date';
+say $fh $self->date;
+say $fh '$end
 $version
    Perl VCD Writer Version '.$Verilog::VCD::Writer::VERSION.'
 $end
-$comment
-   Author:Vijayvithal
-$end
+$comment';
+say $fh join("::\n",$self->comments_all);
+say $fh '$end
 $timescale '.$self->timescale.' $end';
-$_->printScope foreach ($self->modules_all);
-say '$enddefinitions $end
+$_->printScope($fh) foreach ($self->modules_all);
+say $fh '$enddefinitions $end
 $dumpvars
 ';
 }
@@ -125,7 +137,8 @@ This module takes the time information as an integer value and writes it out to 
 
 sub setTime {
 	my ($self,$time)=@_;
-	say '#'.$time;
+	my $fh=$self->_fh;
+	say $fh '#'.$time;
 	
 }
 sub _dec2bin {
@@ -144,13 +157,39 @@ This module prints the <Signal,Value> information as a formatted line to the VCD
 
 sub addValue {
 	my ($self,$sig,$value)=@_;
+	my $fh=$self->_fh;
 	#say  STDERR "Adding Values $sig $value";
 	if ($sig->width == 1){
-	say $value.$sig->symbol;
+	say $fh $value.$sig->symbol;
 	}else {
-	say "b"._dec2bin($value)." ". $sig->symbol;
+	say $fh  "b"._dec2bin($value)." ". $sig->symbol;
 }
 }
+
+=method addComment(comment)
+
+Adds a comment to the VCD file header. This method should be called before writeHeaders();
+
+=cut
+
+sub addComment{
+	my ($self,$comment)=@_;
+	$self->comments_push("   ".$comment);
+}
+
+=method flush()
+
+Flushes the output buffer.
+
+=cut
+
+sub flush{
+	my ($self)=shift;
+	my$fh=$self->_fh;
+	$fh->autoflush(1);
+
+}
+
 
 
 1;

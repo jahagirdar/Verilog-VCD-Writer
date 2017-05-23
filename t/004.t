@@ -1,5 +1,6 @@
 use Test::More;
 use Test::Output;
+use Capture::Tiny qw(capture_stdout);
 use Verilog::VCD::Writer::Module;
 my $m=Verilog::VCD::Writer::Module->new(name=>"top",type=>"module");
 	isa_ok($m, "Verilog::VCD::Writer::Module");
@@ -35,6 +36,9 @@ $upscope $end
 $upscope $end
 $upscope $end
 EOD
-stdout_is(sub{$m->printScope},$expectedScope,"Scope Matches");
+open my $fh,'>-' or die;
+ $|=1;
+ my $out=capture_stdout(sub{$m->printScope($fh)});
+is($out,$expectedScope,"Scope Matches");
 
 done_testing;
