@@ -39,7 +39,7 @@ This module originated out of my need to view the <Time,Voltage> CSV dump from t
 
 This module provides an interface for creating a VCD (Value change Dump) file.
 
-Please see L<examples/serial.pl> for a complete example
+Please see examples/serial.pl for a complete example
 
 
 
