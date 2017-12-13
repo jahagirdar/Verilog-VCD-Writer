@@ -34,9 +34,13 @@ use Verilog::VCD::Writer::Module;
 =cut 
 
 =head1 DESCRIPTION
+
 This module originated out of my need to view the <Time,Voltage> CSV dump from the scope using GTKWave. 
 
 This module provides an interface for creating a VCD (Value change Dump) file.
+
+Please see L<examples/serial.pl> for a complete example
+
 
 
 =cut
