@@ -9,26 +9,26 @@ use Verilog::VCD::Writer::Module;
  
 =head1 SYNOPSIS
 
-	use Verilog::VCD::Writer;
+    use Verilog::VCD::Writer;
 
-	my $writer=Verilog::VCD::Writer->new(timescale=>'1 ns',vcdfile=>"test.vcd");
-	$writer->addComment("Author:Vijayvithal");
+    my $writer = Verilog::VCD::Writer->new(timescale=>'1 ns',vcdfile=>"test.vcd");
+    $writer->addComment("Author:Vijayvithal");
 
-	my $top=$writer->addModule("top"); # Create toplevel module
-	my $TX=$writer->addSignal("TX",7,0); #Add Signals to top
-	my $RX=$writer->addSignal("RX",7,0);
+    my $top = $writer->addModule("top"); # Create toplevel module
+    my $TX  = $top->addSignal("TX",7,0); #Add Signals to top
+    my $RX  = $top->addSignal("RX",7,0);
 
-	my $dut=$top->addModule("DUT");  Create SubModule
-	$dut->dupSignal($TX,"TX",7,0); #Duplicate signals from Top in submodule
-	$dut->dupSignal($RX,"RX",7,0);
-	
-	$writer->writeHeaders(); # Output the VCD Header.
-	$writer->setTime(0); # Time 0
-	$writer->addValue($TX,0); # Record Transition
-	$writer->addValue($RX,0);
-	$writer->setTime(5); # Time 1ns
-	$writer->addValue($TX,1);
-	$writer->addValue($RX,0);
+    my $dut = $writer->addModule("DUT");  #Create SubModule
+    $dut->dupSignal($TX,"TX",7,0); #Duplicate signals from Top in submodule
+    $dut->dupSignal($RX,"RX",7,0);
+
+    $writer->writeHeaders(); # Output the VCD Header.
+    $writer->setTime(0); # Time 0
+    $writer->addValue($TX,0); # Record Transition
+    $writer->addValue($RX,0);
+    $writer->setTime(5); # Time 1ns
+    $writer->addValue($TX,1);
+    $writer->addValue($RX,0);
 
 
 =cut 
